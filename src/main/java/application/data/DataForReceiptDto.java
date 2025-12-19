@@ -1,4 +1,4 @@
-package application;
+package application.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class DataForReceipt {
+public class DataForReceiptDto {
 
     @JsonProperty("payment_id")
     private int paymentId;
@@ -19,6 +19,7 @@ public class DataForReceipt {
     private int amount;
     private String name;
     private String timestamp;
+    private String email;
 
     @Override
     public String toString() {
@@ -28,6 +29,14 @@ public class DataForReceipt {
                 ", amount=" + amount +
                 ", name='" + name + '\'' +
                 ", timestamp='" + timestamp + '\'' +
+                ", email='" + email + '\'' +
                 '}';
+    }
+
+    public String toJsonAsString() {
+        return String.format(
+                "{\"payment_id\":%d,\"quantity\":%d,\"amount\":%d,\"name\":\"%s\",\"timestamp\":\"%s\",\"email\":\"%s\"}",
+                paymentId, quantity, amount, name, timestamp, email
+        );
     }
 }
