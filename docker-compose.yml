@@ -1,11 +1,11 @@
 services:
   redis:
     image: redis:7
+    container_name: redis
     env_file:
       - .env
-    container_name: redis
     ports:
-      - "${REDIS_PORT}:6379"
+      - "${REDIS_DOCKER_PORT}:${REDIS_PORT}"
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
