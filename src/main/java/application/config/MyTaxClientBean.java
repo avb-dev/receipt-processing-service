@@ -16,7 +16,6 @@ public class MyTaxClientBean {
         config.setApiPath(props.getApiPath());
         config.setRefererHeader(props.getReferer());
 
-        MyTaxClient client = new MyTaxClient(config);
-        return client;
+        return new MyTaxClient(config);
     }
 }

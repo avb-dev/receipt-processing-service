@@ -1,5 +1,37 @@
 spring:
   data:
     redis:
-      host: localhost
-      port: 8888
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DB_INDEX}
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  mail:
+    host: ${MAIL_HOST}
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        debug: false
+        smtp:
+          connectiontimeout: 120000
+          timeout: 120000
+          writetimeout: 120000
+          chunking: false
+          auth: true
+          ssl:
+            enable: false
+          starttls:
+            enable: true
+
+logging:
+  level:
+    application: ${LOGGER_LEVEL_ROOT}
+    org.springframework: INFO
