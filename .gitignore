@@ -5,8 +5,6 @@ target/
 .kotlin
 
 ### IntelliJ IDEA ###
-# todo remove libs after adding in project structure
-!/libs
 *.class
 *.log
 *.jar

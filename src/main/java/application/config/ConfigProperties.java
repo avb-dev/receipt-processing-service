@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "conf")
-public class MyTaxClientProperties {
+public class ConfigProperties {
     private String prefix;
     private String zone;
     private String referer;

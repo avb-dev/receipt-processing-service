@@ -1,4 +1,4 @@
-package application.data;
+package application.repository;
 
 import application.exceptions.RedisConnectionException;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RedisService {
+public class RedisRepository {
 
     private final StringRedisTemplate redisTemplate;
 

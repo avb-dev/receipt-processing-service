@@ -1,4 +1,4 @@
-package application.mail;
+package application.entity;
 
 import lombok.Getter;
 

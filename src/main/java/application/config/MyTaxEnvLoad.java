@@ -6,6 +6,6 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource("classpath:myTaxClient.properties")
-@EnableConfigurationProperties(MyTaxClientProperties.class)
+@EnableConfigurationProperties(ConfigProperties.class)
 public class MyTaxEnvLoad {
 }
