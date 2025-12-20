@@ -45,15 +45,15 @@ jobs:
           cp example.env infra/.env
 
           # Mail
-          sed -i "s|MAIL_HOST=.*|MAIL_HOST=${{ secrets.MAIL_HOST_TEST }}|" .env
-          sed -i "s|MAIL_USERNAME=.*|MAIL_USERNAME=${{ secrets.MAIL_USERNAME_TEST }}|" .env
-          sed -i "s|MAIL_PASSWORD=.*|MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD_TEST }}|" .env
-          sed -i "s|MAIL_FROM=.*|MAIL_FROM=${{ secrets.MAIL_FROM_TEST }}|" .env
-          sed -i "s|MAIL_ADMIN=.*|MAIL_ADMIN=${{ secrets.MAIL_ADMIN_TEST }}|" .env
+          sed -i "s|MAIL_HOST=.*|MAIL_HOST=${{ secrets.MAIL_HOST_TEST }}|" infra/.env
+          sed -i "s|MAIL_USERNAME=.*|MAIL_USERNAME=${{ secrets.MAIL_USERNAME_TEST }}|" .infra/.env
+          sed -i "s|MAIL_PASSWORD=.*|MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD_TEST }}|" infra/infra/.env
+          sed -i "s|MAIL_FROM=.*|MAIL_FROM=${{ secrets.MAIL_FROM_TEST }}|" infra/.env
+          sed -i "s|MAIL_ADMIN=.*|MAIL_ADMIN=${{ secrets.MAIL_ADMIN_TEST }}|" infra/.env
 
           # ApiNalog
-          sed -i "s|API_LOGIN=.*|API_LOGIN=${{ secrets.API_LOGIN_TEST }}|" .env
-          sed -i "s|API_PASSWORD=.*|API_PASSWORD=${{ secrets.API_PASSWORD_TEST }}|" .env
+          sed -i "s|API_LOGIN=.*|API_LOGIN=${{ secrets.API_LOGIN_TEST }}|" infra/.env
+          sed -i "s|API_PASSWORD=.*|API_PASSWORD=${{ secrets.API_PASSWORD_TEST }}|" infra/.env
 
 
       - name: Copy docker-compose.test.yml and .env via ssh

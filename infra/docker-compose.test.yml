@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: avbdev999/receipt-processing-service:lastest
+    image: avbdev999/receipt-processing-service:test
     container_name: appNalog
     env_file:
       - .env
