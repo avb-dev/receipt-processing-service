@@ -1,6 +1,6 @@
 package application.jobs;
 
-import application.MainService;
+import application.service.MainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

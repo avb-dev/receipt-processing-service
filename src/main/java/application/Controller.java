@@ -1,6 +1,7 @@
 package application;
 
-import application.data.DataForReceiptDto;
+import application.dto.DataForReceiptDto;
+import application.service.MainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
