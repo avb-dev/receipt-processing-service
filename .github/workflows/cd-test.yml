@@ -42,7 +42,7 @@ jobs:
 
       - name: Generate .env from example.env
         run: |
-          cp example.env .env
+          cp example.env infra/.env
 
           # Mail
           sed -i "s|MAIL_HOST=.*|MAIL_HOST=${{ secrets.MAIL_HOST_TEST }}|" .env
@@ -62,11 +62,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-
-          source: |
-            infra/docker-compose.test.yml
-            infra/init.sql
-            .env
+          source: "infra/docker-compose.test.yml,infra/init.sql,infra/.env"
           target: receipt-processing-service-test
 
       - name: Executing remote ssh commands to deploy

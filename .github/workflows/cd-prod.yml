@@ -42,7 +42,7 @@ jobs:
 
       - name: Generate .env from example.env
         run: |
-          cp example.env .env
+          cp example.env infra/.env
           
           # DB
           sed -i "s|DB_HOST=.*|DB_HOST=${{ secrets.DB_HOST }}|" .env
@@ -74,10 +74,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-
-          source: |
-            infra/docker-compose.prod.yml
-            .env
+          source: "infra/docker-compose.test.yml,infra/.env"
           target: receipt-processing-service
 
       - name: Executing remote ssh commands to deploy
@@ -86,7 +83,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-
           script: |
             cd receipt-processing-service
             sudo docker compose -f docker-compose.prod.yml pull
