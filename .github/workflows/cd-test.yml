@@ -1,16 +1,11 @@
 name: CD Test
 
 on:
-  workflow_run:
-    workflows: ["Java CI"]
-    types:
-      - completed
+  push:
+    branches: [ test ]
 
 jobs:
   start:
-    if: >
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'test'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
