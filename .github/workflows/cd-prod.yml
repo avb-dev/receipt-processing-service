@@ -84,7 +84,7 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd receipt-processing-service
+            cd receipt-processing-service-test/infra
             sudo docker compose -f docker-compose.prod.yml pull
             sudo docker compose -f docker-compose.prod.yml down
             sudo docker compose -f docker-compose.prod.yml up -d
