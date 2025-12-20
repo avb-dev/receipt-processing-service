@@ -1,16 +1,11 @@
 name: CD Prod
 
 on:
-  workflow_run:
-    workflows: ["Java CI"]
-    types:
-      - completed
+  push:
+    branches: [ main ]
 
 jobs:
   start:
-    if: >
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
