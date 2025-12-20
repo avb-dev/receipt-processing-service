@@ -46,7 +46,7 @@ jobs:
 
           # Mail
           sed -i "s|MAIL_HOST=.*|MAIL_HOST=${{ secrets.MAIL_HOST_TEST }}|" infra/.env
-          sed -i "s|MAIL_USERNAME=.*|MAIL_USERNAME=${{ secrets.MAIL_USERNAME_TEST }}|" .infra/.env
+          sed -i "s|MAIL_USERNAME=.*|MAIL_USERNAME=${{ secrets.MAIL_USERNAME_TEST }}|" infra/.env
           sed -i "s|MAIL_PASSWORD=.*|MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD_TEST }}|" infra/infra/.env
           sed -i "s|MAIL_FROM=.*|MAIL_FROM=${{ secrets.MAIL_FROM_TEST }}|" infra/.env
           sed -i "s|MAIL_ADMIN=.*|MAIL_ADMIN=${{ secrets.MAIL_ADMIN_TEST }}|" infra/.env
