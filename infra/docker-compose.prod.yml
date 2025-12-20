@@ -1,0 +1,13 @@
+services:
+
+  app:
+    image: avbdev999/receipt-processing-service:lastest
+    container_name: appNalog
+    env_file:
+      - .env
+    networks:
+      - receipt_processing_network
+
+networks:
+    receipt_processing_network:
+        driver: bridge

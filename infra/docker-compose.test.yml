@@ -34,9 +34,7 @@ services:
     restart: unless-stopped
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: avbdev999/receipt-processing-service:lastest
     container_name: appNalog
     env_file:
       - .env
