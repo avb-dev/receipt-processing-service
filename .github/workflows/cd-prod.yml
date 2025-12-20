@@ -45,27 +45,27 @@ jobs:
           cp example.env infra/.env
           
           # DB
-          sed -i "s|DB_HOST=.*|DB_HOST=${{ secrets.DB_HOST }}|" .env
-          sed -i "s|DB_PORT=.*|DB_PORT=${{ secrets.DB_PORT }}|" .env
-          sed -i "s|DB_NAME=.*|DB_NAME=${{ secrets.DB_NAME }}|" .env
-          sed -i "s|DB_USER=.*|DB_USER=${{ secrets.DB_USER }}|" .env
-          sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.DB_PASSWORD }}|" .env
+          sed -i "s|DB_HOST=.*|DB_HOST=${{ secrets.DB_HOST }}|" infra/.env
+          sed -i "s|DB_PORT=.*|DB_PORT=${{ secrets.DB_PORT }}|" infra/.env
+          sed -i "s|DB_NAME=.*|DB_NAME=${{ secrets.DB_NAME }}|" infra/.env
+          sed -i "s|DB_USER=.*|DB_USER=${{ secrets.DB_USER }}|" infra/.env
+          sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.DB_PASSWORD }}|" infra/.env
           
           # Redis
-          sed -i "s|REDIS_HOST=.*|REDIS_HOST=${{ secrets.REDIS_HOST }}|" .env
-          sed -i "s|REDIS_PORT=.*|REDIS_PORT=${{ secrets.REDIS_PORT }}|" .env
-          sed -i "s|REDIS_PASSWORD=.*|REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}|" .env
+          sed -i "s|REDIS_HOST=.*|REDIS_HOST=${{ secrets.REDIS_HOST }}|" infra/.env
+          sed -i "s|REDIS_PORT=.*|REDIS_PORT=${{ secrets.REDIS_PORT }}|" infra/.env
+          sed -i "s|REDIS_PASSWORD=.*|REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}|" infra/.env
 
           # Mail
-          sed -i "s|MAIL_HOST=.*|MAIL_HOST=${{ secrets.MAIL_HOST }}|" .env
-          sed -i "s|MAIL_USERNAME=.*|MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}|" .env
-          sed -i "s|MAIL_PASSWORD=.*|MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}|" .env
-          sed -i "s|MAIL_FROM=.*|MAIL_FROM=${{ secrets.MAIL_FROM }}|" .env
-          sed -i "s|MAIL_ADMIN=.*|MAIL_ADMIN=${{ secrets.MAIL_ADMIN }}|" .env
+          sed -i "s|MAIL_HOST=.*|MAIL_HOST=${{ secrets.MAIL_HOST }}|" infra/.env
+          sed -i "s|MAIL_USERNAME=.*|MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}|" infra/.env
+          sed -i "s|MAIL_PASSWORD=.*|MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}|" infra/.env
+          sed -i "s|MAIL_FROM=.*|MAIL_FROM=${{ secrets.MAIL_FROM }}|" infra/.env
+          sed -i "s|MAIL_ADMIN=.*|MAIL_ADMIN=${{ secrets.MAIL_ADMIN }}|" infra/.env
 
           # ApiNalog
-          sed -i "s|API_LOGIN=.*|API_LOGIN=${{ secrets.API_LOGIN }}|" .env
-          sed -i "s|API_PASSWORD=.*|API_PASSWORD=${{ secrets.API_PASSWORD }}|" .env
+          sed -i "s|API_LOGIN=.*|API_LOGIN=${{ secrets.API_LOGIN }}|" infra/.env
+          sed -i "s|API_PASSWORD=.*|API_PASSWORD=${{ secrets.API_PASSWORD }}|" infra/.env
 
 
       - name: Copy docker-compose.prod.yml and .env via ssh
