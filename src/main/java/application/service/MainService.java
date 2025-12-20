@@ -1,21 +1,19 @@
-package application;
+package application.service;
 
-import application.data.DataForReceiptDto;
-import application.data.PaymentRepository;
-import application.data.RedisService;
+import application.dto.AuthenticationDto;
+import application.dto.DataForReceiptDto;
+import application.entity.DataForReceipt;
+import application.entity.Receipt;
+import application.repository.PostgresRepository;
 import application.exceptions.MappingException;
 import application.exceptions.RedisConnectionException;
 import application.exceptions.SqlException;
-import application.mail.EmailService;
+import application.repository.RedisRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import ru.loolzaaa.nalog.mytax.client.pojo.Service;
-import ru.loolzaaa.nalog.mytax.client.MyTaxClient;
-import ru.loolzaaa.nalog.mytax.client.dto.AuthenticationDTO;
-import ru.loolzaaa.nalog.mytax.client.pojo.Receipt;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -26,15 +24,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
 public class MainService {
 
     private final ObjectMapper objectMapper;
-    private final RedisService redisService;
+    private final RedisRepository redisService;
     private final EmailService emailService;
-    private final MyTaxClient myTaxClient;
-    private final PaymentRepository paymentRepository;
+    private final ClientService clientService;
+    private final PostgresRepository paymentRepository;
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
 
@@ -110,7 +108,7 @@ public class MainService {
      */
     public void authentification() {
         try {
-            AuthenticationDTO.Profile profile = myTaxClient.init(login, password);
+            AuthenticationDto.Profile profile = clientService.init(login, password);
             log.info("Выполнен вход. Пользователь: {}", profile.getDisplayName());
         } catch (Exception exception) {
             log.info("Не выполнен вход в мой налог !{}", exception.getMessage());
@@ -129,15 +127,15 @@ public class MainService {
             dataForReceiptDto = mapData(dataInString);
             OffsetDateTime operationTime = mapTime(dataForReceiptDto.getTimestamp());
 
-            Service service = new Service(dataForReceiptDto.getName(),
+            DataForReceipt service = new DataForReceipt(dataForReceiptDto.getName(),
                     dataForReceiptDto.getQuantity(),
                     dataForReceiptDto.getAmount());
 
-            List<Service> serviceForMyTax = List.of(service);
+            List<DataForReceipt> serviceForMyTax = List.of(service);
 
             log.info("Обработка строки в библиотеке MyTax");
 
-            receipt = myTaxClient.addIncome(serviceForMyTax, operationTime.toString());
+            receipt = clientService.addIncome(serviceForMyTax, operationTime.toString());
 
             log.info("Успешная обработка, чек: {}, Uuid = {}", receipt.printUrl(), receipt.uuid());
         } catch (Exception exception) {

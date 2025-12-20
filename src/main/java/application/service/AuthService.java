@@ -1,6 +1,5 @@
-package application.jobs;
+package application.service;
 
-import application.MainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -8,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class Auth {
+public class AuthService {
 
     private final MainService mainService;
 

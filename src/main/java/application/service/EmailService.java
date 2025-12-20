@@ -1,6 +1,7 @@
-package application.mail;
+package application.service;
 
 import application.exceptions.MailException;
+import application.entity.HtmlBlank;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

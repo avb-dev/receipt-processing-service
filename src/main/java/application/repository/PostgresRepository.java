@@ -1,4 +1,4 @@
-package application.data;
+package application.repository;
 
 import application.exceptions.SqlException;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class PaymentRepository {
+public class PostgresRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
