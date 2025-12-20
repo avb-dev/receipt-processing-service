@@ -3,8 +3,6 @@ name: Java CI
 on:
   pull_request:
     branches: [ dev, test, main ]
-  push:
-    branches: [ test, main ]
 
 jobs:
   build:
