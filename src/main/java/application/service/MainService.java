@@ -72,7 +72,7 @@ public class MainService {
             } else {
                 message = redisConnectionException.getMessage();
             }
-            log.info("Ошибка соединения к Redis: {}", message);
+            log.warn("Ошибка соединения к Redis: {}", message);
             sendText(adminMail, "Ошибка соединения с Redis", message);
             return false;
         }
@@ -111,7 +111,7 @@ public class MainService {
             AuthenticationDto.Profile profile = clientService.init(login, password);
             log.info("Выполнен вход. Пользователь: {}", profile.getDisplayName());
         } catch (Exception exception) {
-            log.info("Не выполнен вход в мой налог !{}", exception.getMessage());
+            log.warn("Не выполнен вход в мой налог !{}", exception.getMessage());
             sendText(adminMail,
                     "Ошибка аутентификации",
                     exception.getMessage());
@@ -125,7 +125,7 @@ public class MainService {
 
         try {
             dataForReceiptDto = mapData(dataInString);
-            OffsetDateTime operationTime = mapTime(dataForReceiptDto.getTimestamp());
+            OffsetDateTime operationTime = mapTime(dataForReceiptDto);
 
             DataForReceipt service = new DataForReceipt(dataForReceiptDto.getName(),
                     dataForReceiptDto.getQuantity(),
@@ -139,7 +139,7 @@ public class MainService {
 
             log.info("Успешная обработка, чек: {}, Uuid = {}", receipt.printUrl(), receipt.uuid());
         } catch (Exception exception) {
-            log.info("Ошибка при добавлении чека в API налога {}", String.valueOf(exception));
+            log.warn("Ошибка при добавлении чека в API налога {}", String.valueOf(exception));
             if (!handleFlag) {
                 addTestDataToBeginning("receipt", dataInString);
             }
@@ -155,7 +155,7 @@ public class MainService {
             int rows = insertPayment(dataForReceiptDto.getPaymentId(), receipt.uuid());
             log.info("Успешное добавление чека в БД Postgres, обновлено строк: {}", rows);
         } catch (Exception exception) {
-            log.info("Чек добавлен в мой налог, но не добавлен в postgres, {}Uuid ЧЕКА: {}", exception.getMessage(), receipt.uuid());
+            log.warn("Чек добавлен в мой налог, но не добавлен в postgres, {}Uuid ЧЕКА: {}", exception.getMessage(), receipt.uuid());
             sendText(adminMail,
                     "Ошибка при добавлении чека в postgres",
                     exception.getMessage() + "Uuid ЧЕКА: " + receipt.uuid());
@@ -170,7 +170,7 @@ public class MainService {
 
             log.info("Успешное отправка чека покупателю {} чека {}", dataForReceiptDto.getEmail(), receipt.uuid());
         } catch (Exception exception) {
-            log.info("Чек добавлен в мой налог, но не отправлен по почте, {}Uuid ЧЕКА: {}", exception.getMessage(), receipt.uuid());
+            log.warn("Чек добавлен в мой налог, но не отправлен по почте, {}Uuid ЧЕКА: {}", exception.getMessage(), receipt.uuid());
             sendText(adminMail,
                     "Ошибка при отправке чека по почте",
                     exception.getMessage() + "Uuid ЧЕКА: " + receipt.uuid());
@@ -192,18 +192,18 @@ public class MainService {
         }
     }
 
-    private OffsetDateTime mapTime(String timestamp) {
+    private OffsetDateTime mapTime(DataForReceiptDto dataForReceiptDto) {
         try {
             log.info("Маппинг времени");
 
-            LocalDateTime dateTime = LocalDateTime.parse(timestamp, formatter);
+            LocalDateTime dateTime = LocalDateTime.parse(dataForReceiptDto.getTimestamp(), formatter);
             OffsetDateTime dateTimePlusZone = dateTime.atOffset(ZoneOffset.of("+03:00")).
                     truncatedTo(ChronoUnit.SECONDS);
 
             log.info("Маппинг времени завершён, {}", dateTimePlusZone);
             return dateTimePlusZone;
         } catch (Exception exception) {
-            throw new MappingException("Ошибка при маппинге времени");
+            throw new MappingException("Ошибка при маппинге времени из Redis: " + dataForReceiptDto.toString());
         }
     }
 }

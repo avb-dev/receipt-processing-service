@@ -21,9 +21,9 @@ spring:
       mail:
         debug: false
         smtp:
-          connectiontimeout: 120000
-          timeout: 120000
-          writetimeout: 120000
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
           chunking: false
           auth: true
           ssl:
