@@ -6,9 +6,6 @@ services:
       - .env
     ports:
       - "${REDIS_DOCKER_PORT}:${REDIS_PORT}"
-    volumes:
-      - redis_data:/data
-    command: ["redis-server", "--appendonly", "yes"]
     restart: unless-stopped
 
   postgres:
@@ -23,7 +20,7 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - ./infra/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
@@ -46,5 +43,4 @@ services:
 
 
 volumes:
-  redis_data:
   pgdata:
