@@ -13,6 +13,6 @@ public class AuthService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
-            mainService.authentification();
+        mainService.authentification();
     }
 }
