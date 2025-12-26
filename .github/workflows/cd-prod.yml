@@ -74,7 +74,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "infra/docker-compose.test.yml,infra/.env"
+          source: "infra/docker-compose.prod.yml,infra/.env"
           target: receipt-processing-service
 
       - name: Executing remote ssh commands to deploy
