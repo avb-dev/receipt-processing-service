@@ -1,0 +1,101 @@
+name: CD Prod
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  start:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+  build_and_push_to_docker_hub:
+    name: Build&Push Docker image to DockerHub
+    runs-on: ubuntu-latest
+    needs: start
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push to DockerHub
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/receipt-processing-service:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - build_and_push_to_docker_hub
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Generate .env from example.env
+        run: |
+          cp example.env infra/.env
+          
+          # DB
+          sed -i "s|DB_HOST=.*|DB_HOST=${{ secrets.DB_HOST }}|" infra/.env
+          sed -i "s|DB_PORT=.*|DB_PORT=${{ secrets.DB_PORT }}|" infra/.env
+          sed -i "s|DB_NAME=.*|DB_NAME=${{ secrets.DB_NAME }}|" infra/.env
+          sed -i "s|DB_USER=.*|DB_USER=${{ secrets.DB_USER }}|" infra/.env
+          sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.DB_PASSWORD }}|" infra/.env
+          
+          # Redis
+          sed -i "s|REDIS_HOST=.*|REDIS_HOST=${{ secrets.REDIS_HOST }}|" infra/.env
+          sed -i "s|REDIS_PORT=.*|REDIS_PORT=${{ secrets.REDIS_PORT }}|" infra/.env
+          sed -i "s|REDIS_PASSWORD=.*|REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}|" infra/.env
+
+          # Mail
+          sed -i "s|MAIL_HOST=.*|MAIL_HOST=${{ secrets.MAIL_HOST }}|" infra/.env
+          sed -i "s|MAIL_USERNAME=.*|MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}|" infra/.env
+          sed -i "s|MAIL_PASSWORD=.*|MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}|" infra/.env
+          sed -i "s|MAIL_FROM=.*|MAIL_FROM=${{ secrets.MAIL_FROM }}|" infra/.env
+          sed -i "s|MAIL_ADMIN=.*|MAIL_ADMIN=${{ secrets.MAIL_ADMIN }}|" infra/.env
+
+          # ApiNalog
+          sed -i "s|API_LOGIN=.*|API_LOGIN=${{ secrets.API_LOGIN }}|" infra/.env
+          sed -i "s|API_PASSWORD=.*|API_PASSWORD=${{ secrets.API_PASSWORD }}|" infra/.env
+
+
+      - name: Copy docker-compose.prod.yml and .env via ssh
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "infra/docker-compose.prod.yml,infra/.env"
+          target: receipt-processing-service
+
+      - name: Executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd receipt-processing-service/infra
+            sudo docker compose -f docker-compose.prod.yml pull
+            sudo docker compose -f docker-compose.prod.yml down
+            sudo docker compose -f docker-compose.prod.yml up -d
+
+  send_message:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Send message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: Deployment receipt-processing-service to the PROD environment was successful!

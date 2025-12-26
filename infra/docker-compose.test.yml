@@ -1,0 +1,46 @@
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    env_file:
+      - .env
+    ports:
+      - "${REDIS_DOCKER_PORT}:${REDIS_PORT}"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    env_file:
+      - .env
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  app:
+    image: avbdev999/receipt-processing-service:test
+    container_name: appNalog
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - postgres
+    ports:
+      - "${SERVER_PORT}:8080"
+
+
+volumes:
+  pgdata:
