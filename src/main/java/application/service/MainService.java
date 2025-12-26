@@ -48,9 +48,10 @@ public class MainService {
     /*
     Блок для взаимодействия с paymentRepository
      */
-    public int insertPayment(int paymentId, String Uuid) {
+    public void insertPayment(int paymentId, String Uuid) {
         try {
-            return paymentRepository.insertPayment(paymentId, Uuid);
+            int rows = paymentRepository.insertPayment(paymentId, Uuid);
+            log.info("Успешное добавление чека в БД Postgres, обновлено строк: {}", rows);
         } catch (Exception exception) {
             String message = exception.getMessage() + exception.getCause().toString();
             throw new SqlException(message);
@@ -60,9 +61,8 @@ public class MainService {
     /*
     Блок для взаимодействия с RedisService
      */
-    public boolean checkRedis(){
-        try
-        {
+    public boolean checkRedis() {
+        try {
             redisService.checkRedis();
             return true;
         } catch (RedisConnectionException redisConnectionException) {
@@ -84,24 +84,27 @@ public class MainService {
 
     public void addTestDataToBeginning(String key, String data) {
         redisService.addTestDataToBeginning(key, data);
+        log.info("Успешно добавлена строка в очередь {}: {}", key, data);
     }
 
     public String getDataFromEnd(String key) {
-        return redisService.getDataFromEnd(key);
+        String dataFromRedis = redisService.getDataFromEnd(key);
+        log.info("Получение строки из Redis: {}", dataFromRedis);
+        return dataFromRedis;
     }
-
 
     /*
     Блок для взаимодействия с EmailService
      */
     public void sendText(String to, String subject, String text) {
         emailService.sendText(to, subject, text);
+        log.info("Успешная отправка сообщения об ошибке админу {}", text);
     }
 
     public void sendHtml(String to, String subject, String printUrl) {
         emailService.sendHtml(to, subject, printUrl);
+        log.info("Успешная отправка чека покупателю {} чека {}", to, printUrl);
     }
-
 
     /*
     Блок для взаимодействия с MyTalClient
@@ -115,6 +118,7 @@ public class MainService {
             sendText(adminMail,
                     "Ошибка аутентификации",
                     exception.getMessage());
+            throw new IllegalStateException("Ошибка аутентификации в Мой налог: " + exception.getMessage());
         }
     }
 
@@ -133,11 +137,15 @@ public class MainService {
 
             List<DataForReceipt> serviceForMyTax = List.of(service);
 
-            log.info("Обработка строки в библиотеке MyTax");
-
+            log.info("Начало обработки строки в сервисе");
             receipt = clientService.addIncome(serviceForMyTax, operationTime.toString());
-
             log.info("Успешная обработка, чек: {}, Uuid = {}", receipt.printUrl(), receipt.uuid());
+        } catch (MappingException mappingException) {
+            log.warn(String.valueOf(mappingException));
+            sendText(adminMail,
+                    "Ошибка при добавлении чека в API налога, некорректный маппинг данных",
+                    mappingException.getMessage());
+            return Optional.empty();
         } catch (Exception exception) {
             log.warn("Ошибка при добавлении чека в API налога {}", String.valueOf(exception));
             if (!handleFlag) {
@@ -152,10 +160,11 @@ public class MainService {
         //Если в мой налог Чек добавлен, то даже при ошибках далее (postgres и почта) в Redis ничего не возвращается
         //Добавление в postgres
         try {
-            int rows = insertPayment(dataForReceiptDto.getPaymentId(), receipt.uuid());
-            log.info("Успешное добавление чека в БД Postgres, обновлено строк: {}", rows);
+            insertPayment(dataForReceiptDto.getPaymentId(), receipt.uuid());
         } catch (Exception exception) {
-            log.warn("Чек добавлен в мой налог, но не добавлен в postgres, {}Uuid ЧЕКА: {}", exception.getMessage(), receipt.uuid());
+            log.warn("Чек добавлен в мой налог, но не добавлен в postgres, {}Uuid ЧЕКА: {}",
+                    exception.getMessage(),
+                    receipt.uuid());
             sendText(adminMail,
                     "Ошибка при добавлении чека в postgres",
                     exception.getMessage() + "Uuid ЧЕКА: " + receipt.uuid());
@@ -167,10 +176,10 @@ public class MainService {
             sendHtml(dataForReceiptDto.getEmail(),
                     "Спасибо за покупку!",
                     receipt.printUrl());
-
-            log.info("Успешное отправка чека покупателю {} чека {}", dataForReceiptDto.getEmail(), receipt.uuid());
         } catch (Exception exception) {
-            log.warn("Чек добавлен в мой налог, но не отправлен по почте, {}Uuid ЧЕКА: {}", exception.getMessage(), receipt.uuid());
+            log.warn("Чек добавлен в мой налог, но не отправлен по почте, {}Uuid ЧЕКА: {}",
+                    exception.getMessage(),
+                    receipt.uuid());
             sendText(adminMail,
                     "Ошибка при отправке чека по почте",
                     exception.getMessage() + "Uuid ЧЕКА: " + receipt.uuid());
