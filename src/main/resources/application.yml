@@ -14,7 +14,7 @@ spring:
 
   mail:
     host: ${MAIL_HOST}
-    port: 587
+    port: ${MAIL_PORT}
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
@@ -27,9 +27,9 @@ spring:
           chunking: false
           auth: true
           ssl:
-            enable: false
+            enable: ${MAIL_SSLENABLED}
           starttls:
-            enable: true
+            enable: ${MAIL_TLSENABLED}
 
 logging:
   level:
