@@ -33,6 +33,7 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+#Добавить health-check
   app:
     build:
       context: .

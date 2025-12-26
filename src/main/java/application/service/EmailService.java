@@ -31,7 +31,7 @@ public class EmailService {
             msg.setText(text);
             mailSender.send(msg);
         } catch (Exception exception) {
-            log.info("Сообщение не отправлено, проблемы с почтой: {}", exception.getMessage());
+            log.warn("Сообщение не отправлено, проблемы с почтой: {}", exception.getMessage());
         }
     }
 
