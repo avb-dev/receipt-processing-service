@@ -16,13 +16,15 @@ public class ReceiptJob {
 
     private final MainService mainService;
 
-    @Scheduled(fixedDelay = 120, initialDelay = 30, timeUnit = TimeUnit.SECONDS)
+    //как работает fix delay
+    @Scheduled(fixedDelayString = "${FIXED_DELAY}",
+            initialDelayString = "${INITIAL_DELAY}",
+            timeUnit = TimeUnit.SECONDS)
     public void prepareReceipts() {
-
         log.info("Начало работы ReceiptJob!");
 
         //Проверка поднятого Redis
-        if (!mainService.checkRedis()){
+        if (!mainService.checkRedis()) {
             return;
         }
 
@@ -31,10 +33,9 @@ public class ReceiptJob {
             return;
         }
 
+        //Задержка
         while (mainService.getQueueSize("receipt") > 0) {
-            log.info("Передача информации из Redis в приложение");
             String dataFromRedis = mainService.getDataFromEnd("receipt");
-            log.info("Получена строка из Redis: {}", dataFromRedis);
             Optional<String> result = mainService.addReceipt(dataFromRedis, false);
             if (result.isEmpty()) {
                 return;

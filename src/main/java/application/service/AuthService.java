@@ -1,18 +1,18 @@
 package application.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthService implements ApplicationRunner {
 
     private final MainService mainService;
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void init() {
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
         mainService.authentification();
     }
 }

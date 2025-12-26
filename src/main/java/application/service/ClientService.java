@@ -42,7 +42,7 @@ public class ClientService {
 
     private final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
-            .connectTimeout(Duration.ofSeconds(4))
+            .connectTimeout(Duration.ofSeconds(8))
             .build();
 
     private final ReadWriteLock refreshTokenLock = new ReentrantReadWriteLock(true);
