@@ -30,7 +30,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/receipt-processing-service:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/receipt-processing-service:lastest
 
   deploy:
     runs-on: ubuntu-latest
