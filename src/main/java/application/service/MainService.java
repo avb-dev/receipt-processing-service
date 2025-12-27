@@ -148,9 +148,6 @@ public class MainService {
             return Optional.empty();
         } catch (Exception exception) {
             log.warn("Ошибка при добавлении чека в API налога {}", String.valueOf(exception));
-            if (!handleFlag) {
-                addTestDataToBeginning("receipt", dataInString);
-            }
             sendText(adminMail,
                     "Ошибка при добавлении чека в API налога",
                     exception.getMessage());
