@@ -1,7 +1,10 @@
 package application;
 
 import application.dto.DataForReceiptDto;
+import application.repository.RedisRepository;
 import application.service.MainService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,30 +18,21 @@ import org.springframework.web.bind.annotation.*;
 public class Controller {
 
     private final MainService mainService;
+    private final RedisRepository redisRepository;
 
-    //Получение чека
     @PostMapping("/receipt")
-    public ResponseEntity<String> addReceiptByHandle(@RequestBody DataForReceiptDto dataForReceiptDto) {
+    public ResponseEntity<String> addReceiptByHandle(@RequestBody DataForReceiptDto dataForReceiptDto)
+            throws JsonProcessingException, MessagingException {
         String dataForFunction = dataForReceiptDto.toJsonAsString();
-        String printUrl = mainService.addReceipt(dataForFunction, true).orElse("");
-        if (printUrl.isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Чек не добавлен !");
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        String printUrl = mainService.addReceipt(dataForFunction);
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Чек добавлен: " + printUrl);
     }
 
-    //Добавление записи в БД Redis
     @PostMapping("/redis")
     public ResponseEntity<String> addRedisByHandle(@RequestBody DataForReceiptDto dataForReceiptDto) {
-        boolean redisConnection = mainService.checkRedis();
-        if (!redisConnection) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body("Нет подлкючения к БД Redis");
-        }
         String dataForRedis = dataForReceiptDto.toJsonAsString();
-        mainService.addTestDataToBeginning("receipt", dataForRedis);
+        redisRepository.addTestDataToBeginning("receipt", dataForRedis);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Успешно добавлена строка в очередь receipt: " + dataForRedis);
     }

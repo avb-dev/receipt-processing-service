@@ -1,10 +1,11 @@
 package application.repository;
 
-import application.exceptions.SqlException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class PostgresRepository {
@@ -12,12 +13,10 @@ public class PostgresRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public int insertPayment(int paymentId, String uuid) {
-        try {
-            return jdbcTemplate.update(
-                    "INSERT INTO receipts(payment_id, uuid) VALUES (?, ?)", paymentId, uuid
-            );
-        } catch (Exception exception) {
-            throw new SqlException("Ошибка при добавлении данных в postgres", exception);
-        }
+        int rows = jdbcTemplate.update(
+                "INSERT INTO receipts(payment_id, uuid) VALUES (?, ?)", paymentId, uuid
+        );
+        log.info("Успешное добавление в БД Postgres чека: " + uuid + "; paymentId: " + paymentId);
+        return rows;
     }
 }
