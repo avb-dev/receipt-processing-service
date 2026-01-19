@@ -2,6 +2,8 @@ package application.exceptions;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -10,39 +12,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @RequiredArgsConstructor
 public class ExceptionController {
 
-    @ExceptionHandler(SqlException.class)
-    public ExceptionResponse handleSqlException(SqlException exception) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception exception) {
         log.info(exception.getMessage());
-        return new ExceptionResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler(MailException.class)
-    public ExceptionResponse handleMailException(MailException exception) {
-        log.info(exception.getMessage());
-        return new ExceptionResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler(MappingException.class)
-    public ExceptionResponse handleMappingException(MappingException exception) {
-        log.info(exception.getMessage());
-        return new ExceptionResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler(RedisConnectionException.class)
-    public RedisConnectionException handleRedisConnectionException(RedisConnectionException exception) {
-        log.info(exception.getMessage());
-        return new RedisConnectionException(exception.getMessage());
-    }
-
-    @ExceptionHandler(ApiException.class)
-    public ExceptionResponse handleApiException(ApiException exception) {
-        log.info(exception.getMessage());
-        return new ExceptionResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler(ApiRequestException.class)
-    public ExceptionResponse handleApiRequestException(ApiRequestException exception) {
-        log.info(exception.getMessage());
-        return new ExceptionResponse(exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(String.valueOf(exception));
     }
 }

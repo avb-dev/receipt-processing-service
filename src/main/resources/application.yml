@@ -35,3 +35,18 @@ logging:
   level:
     application: ${LOGGER_LEVEL_ROOT}
     org.springframework: INFO
+
+app:
+  config:
+    prefix: ""
+    zone: "+3"
+    api-path: "https://lknpd.nalog.ru/api/v1"
+    referer: "Referer"
+    mail-from: ${MAIL_FROM}
+    mail-admin: ${MAIL_ADMIN}
+    api-login: ${API_LOGIN}
+    api-password: ${API_PASSWORD}
+    delay: ${FIXED_DELAY}
+  job:
+    fixed-delay: ${FIXED_DELAY}
+    initial-delay: ${INITIAL_DELAY}

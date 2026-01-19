@@ -1,11 +1,10 @@
 package application.service;
 
-import application.exceptions.MailException;
+import application.config.AppConfigProperties;
 import application.entity.HtmlBlank;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -13,15 +12,16 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender mailSender;
+    private final String mailFrom;
 
-    @Value("${MAIL_FROM}")
-    private String mailFrom;
+    public EmailService(JavaMailSender mailSender, AppConfigProperties appConfigProperties) {
+        this.mailSender = mailSender;
+        this.mailFrom = appConfigProperties.getMailFrom();
+    }
 
-    //Отправка текста
     public void sendText(String to, String subject, String text) {
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
@@ -35,23 +35,18 @@ public class EmailService {
         }
     }
 
-    //Отправка html
-    public void sendHtml(String to, String subject, String printUrl) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
+    public void sendHtml(String to, String subject, String printUrl) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
 
-            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
-            helper.setFrom(mailFrom);
-            helper.setTo(to);
-            helper.setSubject(subject);
+        MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+        helper.setFrom(mailFrom);
+        helper.setTo(to);
+        helper.setSubject(subject);
 
-            HtmlBlank html = new HtmlBlank(printUrl);
-            helper.setText(html.getHtml(), true);
+        HtmlBlank html = new HtmlBlank(printUrl);
+        helper.setText(html.getHtml(), true);
 
-            mailSender.send(message);
-
-        } catch (Exception exception) {
-            throw new MailException(exception.getMessage());
-        }
+        mailSender.send(message);
+        log.info("Успешная отправка покупателю " + to + " письма: " + printUrl);
     }
 }
