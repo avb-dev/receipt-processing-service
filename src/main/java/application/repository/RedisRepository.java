@@ -1,42 +1,31 @@
 package application.repository;
 
-import application.exceptions.RedisConnectionException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RedisRepository {
 
     private final StringRedisTemplate redisTemplate;
 
-    //Проверка работоспособности поднятого Redis
-    public void checkRedis() {
-        try {
-            String pong = redisTemplate.getConnectionFactory().getConnection().ping();
-            if (!"PONG".equalsIgnoreCase(pong)) {
-                throw new RedisConnectionException("Redis не вернул PONG");
-            }
-        } catch (RedisConnectionException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new RedisConnectionException("Ошибка соединения с БД Redis", exception);
-        }
-    }
-
-    //Получение количества элементов в очереди
     public Long getQueueSize(String key) {
+        Long queueSize = redisTemplate.opsForList().size(key);
+        log.info("Размер очереди: {}", queueSize);
         return redisTemplate.opsForList().size(key);
     }
 
-    //Добавление строки в начало очереди (списка)
     public void addTestDataToBeginning(String key, String data) {
         redisTemplate.opsForList().leftPush(key, data);
+        log.info("Добавлена строка в БД Redis : {} под ключом: {}", data, key);
     }
 
-    //Получение строки из конца очереди (списка)
     public String getDataFromEnd(String key) {
-            return redisTemplate.opsForList().rightPop(key);
+        String dataFromRedis = redisTemplate.opsForList().rightPop(key);
+        log.info("Получена строка из БД Redis: {} под ключом: {}", dataFromRedis, key);
+        return dataFromRedis;
     }
 }
