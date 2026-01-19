@@ -58,10 +58,6 @@ public class ClientService {
 
     private String inn;
 
-    public ClientService() {
-        this(new ClientConfig());
-    }
-
     public ClientService(ClientConfig clientConfig) {
         this.clientConfig = clientConfig;
         this.deviceId = generateDeviceId(this.clientConfig.getPrefix());
@@ -73,7 +69,6 @@ public class ClientService {
         this.token = authenticate.getToken();
         this.tokenExpireIn = authenticate.getTokenExpireIn();
         this.inn = authenticate.getProfile().getInn();
-        log.info("User {} successfully authenticated in {}", this.inn, clientConfig.getApiPath());
         return authenticate.getProfile();
     }
 

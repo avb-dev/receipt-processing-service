@@ -1,17 +1,15 @@
 package application.config;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 public class ClientConfig {
-    @NonNull
-    private String prefix = "";
-    @NonNull
-    private String apiPath = "https://lknpd.nalog.ru/api/v1";
-    @NonNull
-    private String zoneOffset = "Z";
-    @NonNull
-    private String refererHeader = "Referer";
+    private String prefix;
+    private String apiPath;
+    private String zoneOffset;
+    private String refererHeader;
 }
