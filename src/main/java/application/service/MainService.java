@@ -5,6 +5,7 @@ import application.dto.AuthenticationDto;
 import application.dto.DataForReceiptDto;
 import application.entity.DataForReceipt;
 import application.entity.Receipt;
+import application.exceptions.ApiException;
 import application.repository.PostgresRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +19,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -34,7 +34,6 @@ public class MainService {
     private final PostgresRepository paymentRepository;
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
-    private OffsetDateTime lastOperationTime;
 
     public MainService(AppConfigProperties appConfigProperties,
                        ObjectMapper objectMapper,
@@ -63,17 +62,7 @@ public class MainService {
         }
     }
 
-    public String addReceipt(String dataInString) throws JsonProcessingException, MessagingException {
-        DataForReceiptDto dataForReceiptDto = mapData(dataInString);
-        OffsetDateTime operationTime = mapTime(dataForReceiptDto);
-
-        if (lastOperationTime != null) {
-            if (operationTime.isEqual(lastOperationTime) || operationTime.isBefore(lastOperationTime)) {
-                operationTime = lastOperationTime.plusSeconds(1);
-            }
-        }
-        log.info("Время операции с учетом проверки на совпадение: {}", operationTime);
-
+    public String addReceipt(DataForReceiptDto dataForReceiptDto) throws MessagingException {
         DataForReceipt dataForReceipt = new DataForReceipt(
                 dataForReceiptDto.getName(),
                 dataForReceiptDto.getQuantity(),
@@ -82,9 +71,8 @@ public class MainService {
 
         List<DataForReceipt> serviceForMyTax = List.of(dataForReceipt);
 
-        Receipt receipt = clientService.addIncome(serviceForMyTax, operationTime.toString());
+        Receipt receipt = clientService.addIncome(serviceForMyTax, dataForReceiptDto.getTimestamp());
         log.info("Успешная обработка в НАЛОГЕ, чек: {}, Uuid = {}", receipt.printUrl(), receipt.uuid());
-        lastOperationTime = operationTime;
 
         paymentRepository.insertPayment(dataForReceiptDto.getPaymentId(), receipt.uuid());
 
@@ -97,15 +85,21 @@ public class MainService {
 
     public DataForReceiptDto mapData(String dataFromRedis) throws JsonProcessingException {
         DataForReceiptDto data = objectMapper.readValue(dataFromRedis, DataForReceiptDto.class);
+
+        LocalDateTime dateTime = LocalDateTime.parse(data.getTimestamp(), formatter);
+        OffsetDateTime dateTimePlusZone = dateTime.atOffset(ZoneOffset.of("+03:00")).
+                truncatedTo(ChronoUnit.SECONDS);
+        data.setTimestamp(dateTimePlusZone.toString());
+
         log.info("Маппинг данных завершён: {}", data);
         return data;
     }
 
-    private OffsetDateTime mapTime(DataForReceiptDto dataForReceiptDto) {
-        LocalDateTime dateTime = LocalDateTime.parse(dataForReceiptDto.getTimestamp(), formatter);
-        OffsetDateTime dateTimePlusZone = dateTime.atOffset(ZoneOffset.of("+03:00")).
-                truncatedTo(ChronoUnit.SECONDS);
-        log.info("Маппинг времени завершён, {}", dateTimePlusZone);
-        return dateTimePlusZone;
+    public String correctTimestampForRedis(DataForReceiptDto dataForReceiptDto) {
+        OffsetDateTime dateTime = OffsetDateTime.parse(dataForReceiptDto.getTimestamp());
+        LocalDateTime dateTimePlusSecond = dateTime.toLocalDateTime().plusSeconds(1);
+        String dateTimePlusSecondString = dateTimePlusSecond.format(formatter);
+        dataForReceiptDto.setTimestamp(dateTimePlusSecondString);
+        return dataForReceiptDto.toJsonAsString();
     }
 }

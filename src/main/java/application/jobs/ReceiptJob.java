@@ -1,6 +1,7 @@
 package application.jobs;
 
 import application.config.AppConfigProperties;
+import application.dto.DataForReceiptDto;
 import application.exceptions.ApiException;
 import application.repository.RedisRepository;
 import application.service.EmailService;
@@ -43,6 +44,7 @@ public class ReceiptJob {
         log.info("Начало работы ReceiptJob!");
 
         String dataFromRedis = null;
+        DataForReceiptDto dataForReceiptDto = null;
         StringBuilder excMessageBuilder = new StringBuilder();
 
         try {
@@ -62,18 +64,14 @@ public class ReceiptJob {
 
             for (int i = 1; i <= queueSizeForReceipt; i++) {
                 dataFromRedis = redisRepository.getDataFromEnd("receipt");
-                mainService.addReceipt(dataFromRedis);
-                if (i > 1 || i == queueSizeForReceipt ) {
-                    lastExceptionMessage = "";
-                }
+                dataForReceiptDto = mainService.mapData(dataFromRedis);
+                mainService.addReceipt(dataForReceiptDto);
+                lastExceptionMessage = null;
             }
         } catch (ApiException apiException) {
             log.warn("Ошибка при добавлении чека в API налога, связанная с НАЛОГОМ {}", String.valueOf(apiException));
 
-            if (dataFromRedis != null) {
-                excMessageBuilder.append(dataFromRedis).append("; ");
-            }
-            excMessageBuilder.append(apiException);
+            excMessageBuilder.append(dataFromRedis).append("\n ").append(apiException);
             String excMessage = excMessageBuilder.toString();
             if (!apiException.getMessage().equals(lastExceptionMessage)) {
                 emailService.sendText(mailAdmin,
@@ -82,14 +80,17 @@ public class ReceiptJob {
             }
             lastExceptionMessage = apiException.getMessage();
 
-            if (dataFromRedis != null) {
+            if (apiException.getMessage().contains("\"code\":\"receipt.duplication\"")) {
+                String dataWithCorrectTimeStamp = mainService.correctTimestampForRedis(dataForReceiptDto);
+                redisRepository.addTestDataToBeginning("receipt", dataWithCorrectTimeStamp);
+            } else {
                 redisRepository.addTestDataToBeginning("receipt", dataFromRedis);
             }
         } catch (Exception exception) {
             log.warn("Ошибка при добавлении чека в API налога, несвязанная с НАЛОГОМ {}", String.valueOf(exception));
 
             if (dataFromRedis != null) {
-                excMessageBuilder.append(dataFromRedis).append("; ");
+                excMessageBuilder.append(dataFromRedis).append("\n ");
             }
             excMessageBuilder.append(exception);
             String excMessage = excMessageBuilder.toString();

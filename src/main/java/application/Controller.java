@@ -22,9 +22,10 @@ public class Controller {
 
     @PostMapping("/receipt")
     public ResponseEntity<String> addReceiptByHandle(@RequestBody DataForReceiptDto dataForReceiptDto)
-            throws JsonProcessingException, MessagingException {
-        String dataForFunction = dataForReceiptDto.toJsonAsString();
-        String printUrl = mainService.addReceipt(dataForFunction);
+            throws MessagingException, JsonProcessingException {
+        String data = dataForReceiptDto.toJsonAsString();
+        DataForReceiptDto dataForReceipt = mainService.mapData(data);
+        String printUrl = mainService.addReceipt(dataForReceipt);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Чек добавлен: " + printUrl);
     }
