@@ -30,11 +30,18 @@ public class Controller {
                 .body("Чек добавлен: " + printUrl);
     }
 
-    @PostMapping("/redis")
-    public ResponseEntity<String> addRedisByHandle(@RequestBody DataForReceiptDto dataForReceiptDto) {
+    @PostMapping("/redisIncome")
+    public ResponseEntity<String> addRedisIncomeByHandle(@RequestBody DataForReceiptDto dataForReceiptDto) {
         String dataForRedis = dataForReceiptDto.toJsonAsString();
         redisRepository.addTestDataToBeginning("receipt", dataForRedis);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Успешно добавлена строка в очередь receipt: " + dataForRedis);
+    }
+
+    @PostMapping("/redisCancel")
+    public ResponseEntity<String> addRedisCancelByHandle(@RequestBody String uuid) {
+        redisRepository.addTestDataToBeginning("return", uuid);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Успешно добавлена строка в очередь return: " + uuid);
     }
 }

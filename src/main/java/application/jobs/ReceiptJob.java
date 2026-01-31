@@ -51,7 +51,7 @@ public class ReceiptJob {
             Long queueSize = redisRepository.getQueueSize("receipt");
 
             if (queueSize.equals(0L)) {
-                log.info("Очередь пуста");
+                log.info("Очередь добавления чеков пуста");
                 return;
             }
 
