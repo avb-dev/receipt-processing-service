@@ -69,7 +69,12 @@ public class ReturnJob {
                         "Ошибка при возврате чека в API налога, связанная с НАЛОГОМ",
                         excMessage);
             }
+            lastExceptionMessage = apiException.getMessage();
 
+            if (apiException.getMessage().contains("\"code\":\"receipt.id.not.found\"") ||
+                    apiException.getMessage().contains("\"code\":\"receipt.already.canceled\"")) {
+                return;
+            }
             redisRepository.addTestDataToBeginning("return", uuidFromRedis);
         } catch (Exception exception) {
             log.warn("Ошибка при возврате чека в API налога, несвязанная с НАЛОГОМ {}", String.valueOf(exception));
