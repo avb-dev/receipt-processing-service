@@ -5,7 +5,6 @@ import application.dto.AuthenticationDto;
 import application.dto.DataForReceiptDto;
 import application.entity.DataForReceipt;
 import application.entity.Receipt;
-import application.exceptions.ApiException;
 import application.repository.PostgresRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,12 +68,16 @@ public class MainService {
                 dataForReceiptDto.getAmount()
         );
 
-        List<DataForReceipt> serviceForMyTax = List.of(dataForReceipt);
+        List<DataForReceipt> dataForReceiptList = List.of(dataForReceipt);
 
-        Receipt receipt = clientService.addIncome(serviceForMyTax, dataForReceiptDto.getTimestamp());
+        Receipt receipt = clientService.addIncome(dataForReceiptList, dataForReceiptDto.getTimestamp());
         log.info("Успешная обработка в НАЛОГЕ, чек: {}, Uuid = {}", receipt.printUrl(), receipt.uuid());
 
-        paymentRepository.insertPayment(dataForReceiptDto.getPaymentId(), receipt.uuid());
+        if (dataForReceiptDto.getPaymentId() != 2) {
+            paymentRepository.insertPayment(dataForReceiptDto.getPaymentId(),
+                    receipt.uuid(),
+                    OffsetDateTime.parse(dataForReceiptDto.getTimestamp()));
+        }
 
         emailService.sendHtml(dataForReceiptDto.getEmail(),
                 "Спасибо за покупку!",
@@ -83,12 +86,21 @@ public class MainService {
         return receipt.printUrl();
     }
 
+    public void returnReceipt(String uuid) {
+        OffsetDateTime operationTime = LocalDateTime.now().atOffset(ZoneOffset.of("+03:00"))
+                .truncatedTo(ChronoUnit.SECONDS);
+        String result = clientService.returnReceipt(uuid, operationTime.toString());
+        paymentRepository.updateRefund(uuid);
+
+        log.info("Успешный возврат чека в НАЛОГЕ: {}", result);
+    }
+
     public DataForReceiptDto mapData(String dataFromRedis) throws JsonProcessingException {
         DataForReceiptDto data = objectMapper.readValue(dataFromRedis, DataForReceiptDto.class);
 
         LocalDateTime dateTime = LocalDateTime.parse(data.getTimestamp(), formatter);
-        OffsetDateTime dateTimePlusZone = dateTime.atOffset(ZoneOffset.of("+03:00")).
-                truncatedTo(ChronoUnit.SECONDS);
+        OffsetDateTime dateTimePlusZone = dateTime.atOffset(ZoneOffset.of("+03:00"))
+                .truncatedTo(ChronoUnit.SECONDS);
         data.setTimestamp(dateTimePlusZone.toString());
 
         log.info("Маппинг данных завершён: {}", data);
