@@ -3,6 +3,7 @@ package application.jobs;
 import application.config.AppConfigProperties;
 import application.dto.DataForReceiptDto;
 import application.exceptions.ApiException;
+import application.repository.PostgresRepository;
 import application.repository.RedisRepository;
 import application.service.EmailService;
 import application.service.MainService;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -19,6 +21,7 @@ public class ReceiptJob {
     private final MainService mainService;
     private final RedisRepository redisRepository;
     private final EmailService emailService;
+    private final PostgresRepository postgresRepository;
 
     private final Long delay;
 
@@ -29,12 +32,14 @@ public class ReceiptJob {
     public ReceiptJob(MainService mainService,
                       RedisRepository redisRepository,
                       EmailService emailService,
-                      AppConfigProperties appConfigProperties) {
+                      AppConfigProperties appConfigProperties,
+                      PostgresRepository postgresRepository) {
         this.mainService = mainService;
         this.redisRepository = redisRepository;
         this.emailService = emailService;
         this.delay = Long.parseLong(appConfigProperties.getDelay());
         this.mailAdmin = appConfigProperties.getMailAdmin();
+        this.postgresRepository = postgresRepository;
     }
 
     @Scheduled(fixedDelayString = "${app.job.fixed-delay}",
@@ -51,7 +56,7 @@ public class ReceiptJob {
             Long queueSize = redisRepository.getQueueSize("receipt");
 
             if (queueSize.equals(0L)) {
-                log.info("Очередь пуста");
+                log.info("Очередь добавления чеков пуста");
                 return;
             }
 
@@ -81,11 +86,14 @@ public class ReceiptJob {
             lastExceptionMessage = apiException.getMessage();
 
             if (apiException.getMessage().contains("\"code\":\"receipt.duplication\"")) {
-                String dataWithCorrectTimeStamp = mainService.correctTimestampForRedis(dataForReceiptDto);
-                redisRepository.addTestDataToBeginning("receipt", dataWithCorrectTimeStamp);
-            } else {
-                redisRepository.addTestDataToBeginning("receipt", dataFromRedis);
+                OffsetDateTime forCheck = OffsetDateTime.parse(dataForReceiptDto.getTimestamp());
+                if (postgresRepository.isWrittenLocally(forCheck)) {
+                    String dataWithCorrectTimeStamp = mainService.correctTimestampForRedis(dataForReceiptDto);
+                    redisRepository.addTestDataToBeginning("receipt", dataWithCorrectTimeStamp);
+                }
+                return;
             }
+            redisRepository.addTestDataToBeginning("receipt", dataFromRedis);
         } catch (Exception exception) {
             log.warn("Ошибка при добавлении чека в API налога, несвязанная с НАЛОГОМ {}", String.valueOf(exception));
 
