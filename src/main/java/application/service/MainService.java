@@ -73,7 +73,11 @@ public class MainService {
         Receipt receipt = clientService.addIncome(dataForReceiptList, dataForReceiptDto.getTimestamp());
         log.info("Успешная обработка в НАЛОГЕ, чек: {}, Uuid = {}", receipt.printUrl(), receipt.uuid());
 
-        paymentRepository.insertPayment(dataForReceiptDto.getPaymentId(), receipt.uuid());
+        if (dataForReceiptDto.getPaymentId() != 2) {
+            paymentRepository.insertPayment(dataForReceiptDto.getPaymentId(),
+                    receipt.uuid(),
+                    OffsetDateTime.parse(dataForReceiptDto.getTimestamp()));
+        }
 
         emailService.sendHtml(dataForReceiptDto.getEmail(),
                 "Спасибо за покупку!",
@@ -82,12 +86,13 @@ public class MainService {
         return receipt.printUrl();
     }
 
-    public String returnReceipt(String uuid) {
+    public void returnReceipt(String uuid) {
         OffsetDateTime operationTime = LocalDateTime.now().atOffset(ZoneOffset.of("+03:00"))
-                        .truncatedTo(ChronoUnit.SECONDS);
+                .truncatedTo(ChronoUnit.SECONDS);
         String result = clientService.returnReceipt(uuid, operationTime.toString());
+        paymentRepository.updateRefund(uuid);
+
         log.info("Успешный возврат чека в НАЛОГЕ: {}", result);
-        return result;
     }
 
     public DataForReceiptDto mapData(String dataFromRedis) throws JsonProcessingException {
@@ -95,7 +100,7 @@ public class MainService {
 
         LocalDateTime dateTime = LocalDateTime.parse(data.getTimestamp(), formatter);
         OffsetDateTime dateTimePlusZone = dateTime.atOffset(ZoneOffset.of("+03:00"))
-                        .truncatedTo(ChronoUnit.SECONDS);
+                .truncatedTo(ChronoUnit.SECONDS);
         data.setTimestamp(dateTimePlusZone.toString());
 
         log.info("Маппинг данных завершён: {}", data);

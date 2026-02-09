@@ -71,6 +71,7 @@ public class ReturnJob {
             }
             lastExceptionMessage = apiException.getMessage();
 
+            //parsing JSON
             if (apiException.getMessage().contains("\"code\":\"receipt.id.not.found\"") ||
                     apiException.getMessage().contains("\"code\":\"receipt.already.canceled\"")) {
                 return;

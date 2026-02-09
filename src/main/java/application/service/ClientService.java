@@ -151,6 +151,7 @@ public class ClientService {
 
         refreshTokenLock.readLock().lock();
 
+        //возврат
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             int statusCode = response.statusCode();
