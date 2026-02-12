@@ -15,6 +15,7 @@ public class AppConfigProperties {
     private String referer;
     private String apiPath;
 
+    private String mailFrom;
     private String mailAdmin;
 
     private String apiLogin;
