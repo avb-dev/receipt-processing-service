@@ -134,7 +134,7 @@ public class ClientService {
         checkToken();
 
         ObjectNode payload = MAPPER.createObjectNode();
-        payload.put("comment", "Чек сформирован ошибочно");
+        payload.put("comment", "Возврат средств");
         payload.put("partnerCode", "null");
         payload.put("operationTime", operationTime);
         payload.put("requestTime", operationTime);
