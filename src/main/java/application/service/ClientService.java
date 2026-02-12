@@ -130,6 +130,47 @@ public class ClientService {
         }
     }
 
+    public String returnReceipt(String uuid, String operationTime) {
+        checkToken();
+
+        ObjectNode payload = MAPPER.createObjectNode();
+        payload.put("comment", "Чек сформирован ошибочно");
+        payload.put("partnerCode", "null");
+        payload.put("operationTime", operationTime);
+        payload.put("requestTime", operationTime);
+        payload.put("receiptUuid", uuid);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(clientConfig.getApiPath() + "/cancel"))
+                .timeout(Duration.ofSeconds(15))
+                .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                .headers(getCommonHeaders())
+                .header(clientConfig.getRefererHeader(), "https://lknpd.nalog.ru/sales")
+                .header("Authorization", "Bearer " + token)
+                .build();
+
+        refreshTokenLock.readLock().lock();
+
+        //возврат
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            int statusCode = response.statusCode();
+            String body = response.body();
+            if (statusCode != 200) {
+                throw new ApiRequestException("return error", statusCode, body);
+            }
+            String name = MAPPER.readTree(body).path("incomeInfo").path("name").asText();
+            String uuidFromResponse = MAPPER.readTree(body).path("incomeInfo").path("approvedReceiptUuid").asText();
+            String amount = MAPPER.readTree(body).path("incomeInfo").path("totalAmount").asText();
+
+            return uuidFromResponse + "; наименование услуги: " + name + "; " + "стоимость услуги: " + amount + ";";
+        } catch (Exception e) {
+            throw new ApiException(e.getMessage());
+        } finally {
+            refreshTokenLock.readLock().unlock();
+        }
+    }
+
     private AuthenticationDto authenticate(String username, String password) {
         ObjectNode payload = MAPPER.createObjectNode();
         payload.put("username", username);

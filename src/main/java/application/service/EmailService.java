@@ -19,7 +19,7 @@ public class EmailService {
 
     public EmailService(JavaMailSender mailSender, AppConfigProperties appConfigProperties) {
         this.mailSender = mailSender;
-        this.mailFrom = appConfigProperties.getMailFrom();
+        this.mailFrom = appConfigProperties.getMailAdmin();
     }
 
     public void sendText(String to, String subject, String text) {
