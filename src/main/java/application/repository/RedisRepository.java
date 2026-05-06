@@ -14,7 +14,7 @@ public class RedisRepository {
 
     public Long getQueueSize(String key) {
         Long queueSize = redisTemplate.opsForList().size(key);
-        log.info("Размер очереди: {}", queueSize);
+        log.info("Размер очереди: {} под ключом: {}", queueSize, key);
         return redisTemplate.opsForList().size(key);
     }
 

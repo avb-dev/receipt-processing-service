@@ -7,7 +7,7 @@ public class HtmlBlank {
 
     private final String html;
 
-    public HtmlBlank (String printUrl) {
+    public HtmlBlank(String printUrl) {
 
         this.html = "<!DOCTYPE html>\n" +
                 "<html lang=\"ru\">\n" +

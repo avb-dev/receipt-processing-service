@@ -6,6 +6,8 @@ RUN apk add --no-cache maven
 
 COPY pom.xml ./pom.xml
 COPY src ./src
+COPY checkstyle.xml ./checkstyle.xml
+COPY suppressions.xml ./suppressions.xml
 
 RUN --mount=type=cache,target=/root/.m2 mvn clean package
 

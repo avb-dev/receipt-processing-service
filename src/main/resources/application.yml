@@ -50,3 +50,4 @@ app:
   job:
     fixed-delay: ${FIXED_DELAY}
     initial-delay: ${INITIAL_DELAY}
+    return-delay: ${RETURN_DELAY}

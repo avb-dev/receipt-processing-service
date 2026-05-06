@@ -8,10 +8,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 @EnableScheduling
-public class Application
-{
-    //Поднимаю контекст
-    public static void main( String[] args ) {
+public class Application {
+    public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 }

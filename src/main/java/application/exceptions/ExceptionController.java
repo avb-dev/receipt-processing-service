@@ -14,9 +14,9 @@ public class ExceptionController {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception exception) {
-        log.info(exception.getMessage());
+        log.warn("Ошибка:", exception);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(String.valueOf(exception));
+                .body(String.valueOf(exception.getMessage()));
     }
 }
