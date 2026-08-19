@@ -3,6 +3,7 @@ services:
   app:
     image: avbdev999/receipt-processing-service:lastest
     container_name: appNalog
+    restart: unless-stopped
     env_file:
       - .env
     networks:
