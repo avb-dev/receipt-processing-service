@@ -179,7 +179,7 @@ public class ClientService {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(clientConfig.getApiPath() + "/auth/lkfl"))
-                .timeout(Duration.ofSeconds(30))
+                .timeout(Duration.ofSeconds(10))
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .headers(getCommonHeaders())
                 .header(clientConfig.getRefererHeader(), "https://lknpd.nalog.ru/auth/login")
@@ -208,7 +208,7 @@ public class ClientService {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(clientConfig.getApiPath() + "/auth/token"))
-                .timeout(Duration.ofSeconds(30))
+                .timeout(Duration.ofSeconds(10))
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .headers(getCommonHeaders())
                 .header(clientConfig.getRefererHeader(), "https://lknpd.nalog.ru/sales")
